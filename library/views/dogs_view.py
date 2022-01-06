@@ -4,34 +4,36 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import DogSerializer
-from .models import Dog
+from ..serializers import DogSerializer, DogReadSerializer
+from ..models.dog import Dog
 
 # Create your views here.
 class DogsView(APIView):
     """Class for Index and Post"""
     def get(self, request):
         """Index Books"""
+        print(request)
         dogs = Dog.objects.all()
-        data = DogSerializer(dogs, many=True).data
+        data = DogReadSerializer(dogs, many=True).data
         return Response(data)
     
+    serializer_class = DogSerializer
     def post(self, request):
         """Create Books"""
         print(request.data)
         dog = DogSerializer(data=request.data)
         if dog.is_valid():
-            dog.save()
+            d = dog.save()
             return Response(dog.data, status=status.HTTP_201_CREATED)
         else:
             return Response(dog.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DogDetailView(APIView):
+class DogDetailView(APIView): 
     def get(self, request, pk):
         """Show one Dog"""
         dog = get_object_or_404(Dog, pk=pk)
-        data = DogSerializer(dog).data
+        data = DogReadSerializer(dog).data
         return Response(data)
     
     def delete(self, request, pk):
